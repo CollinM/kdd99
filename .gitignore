@@ -1,0 +1,7 @@
+.classpath
+.gradle/**
+.settings/**
+bin/**
+build/**
+data/**
+doc/task.html

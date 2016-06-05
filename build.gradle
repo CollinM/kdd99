@@ -1,0 +1,65 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'maven'
+
+group = 'collinm'
+version = '0'
+
+eclipse.classpath.downloadJavadoc = true
+
+// Repo's
+repositories {
+	mavenCentral()
+	mavenLocal()
+}
+
+configurations {
+    fat {
+        transitive = true
+    }
+}
+
+// Dependencies
+dependencies {
+	// Utilities
+	compile 'com.esotericsoftware:kryo:3.0.3'
+	compile 'com.google.guava:guava:19.0'
+	compile 'org.javatuples:javatuples:1.2'
+	compile 'org.slf4j:slf4j-api:1.7.21'
+	// Spark
+	compile 'com.databricks:spark-csv_2.10:1.4.0'
+	compile('org.apache.spark:spark-core_2.10:1.6.1')
+	compile('org.apache.spark:spark-mllib_2.10:1.6.1')
+
+	// Package in the fat jar so they're usable at runtime (in Spark)!
+	fat 'com.google.guava:guava:19.0'
+	fat 'org.javatuples:javatuples:1.2'
+	fat 'com.databricks:spark-csv_2.10:1.4.0'
+}
+
+task fatJar(type:Jar, dependsOn: classes) {
+    classifier = 'fat'
+
+    //from(file('src/main/resources/logback.xml'))
+    from(files(sourceSets.main.output.classesDir))
+    from(configurations.fat.collect { it.isDirectory() ? it : zipTree(it) }) {
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+    }
+
+    manifest {
+        attributes 'Implementation-Version': version,
+                'Built-By': System.getProperty('user.name'),
+                'Built-Date': new Date()
+    }
+}
+
+task javadocJar(type: Jar, dependsOn: check) {
+	classifier = 'javadoc'
+	from javadoc.destinationDir
+}
+
+artifacts {
+	archives javadocJar
+}
