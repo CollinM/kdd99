@@ -136,13 +136,13 @@ public class ConfusionMatrix {
 		Joiner commaJoiner = Joiner.on(",");
 
 		// Writer header
-		out.append(",");
+		out.append("A\\P,");
 		out.append(commaJoiner.join(this.classes));
 		out.append("\n");
 
 		// Write each row class + data
 		for (int i = 0; i < this.numClasses; i++) {
-			out.append(Integer.toString(i) + ",");
+			out.append(this.classes[i] + ",");
 			out.append(commaJoiner.join(this.matrix.get(i)));
 			out.append("\n");
 		}

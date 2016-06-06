@@ -5,3 +5,5 @@ bin/**
 build/**
 data/**
 doc/task.html
+output/**/pairs.csv
+output/**/triplets.csv

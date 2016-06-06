@@ -6,8 +6,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.spark.ml.Pipeline;
+import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.PipelineStage;
 import org.apache.spark.ml.feature.OneHotEncoder;
 import org.apache.spark.ml.feature.StringIndexer;
@@ -17,10 +19,22 @@ import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.Metadata;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
+import org.javatuples.Pair;
+import org.javatuples.Triplet;
 
 import collinm.util.ConfusionMatrix;
 
 public class Kdd99Util {
+
+	public final static String[] TRAIN_CLASSES = new String[] { "back", "buffer_overflow", "ftp_write", "guess_passwd",
+			"imap", "ipsweep", "land", "loadmodule", "multihop", "neptune", "nmap", "perl", "phf", "pod", "portsweep",
+			"rootkit", "satan", "smurf", "spy", "teardrop", "warezclient", "warezmaster", "normal" };
+	public final static String[] ALL_CLASSES = new String[] { "back", "buffer_overflow", "ftp_write", "guess_passwd",
+			"imap", "ipsweep", "land", "loadmodule", "multihop", "neptune", "nmap", "perl", "phf", "pod", "portsweep",
+			"rootkit", "satan", "smurf", "spy", "teardrop", "warezclient", "warezmaster", "normal", "apache2",
+			"httptunnel", "mailbomb", "mscan", "named", "processtable", "ps", "saint", "sendmail", "snmpgetattack",
+			"snmpguess", "sqlattack", "udpstorm", "worm", "xlock", "xsnoop", "xterm" };
+	public final static String[] BIN_CLASSES = new String[] { "anomaly", "normal" };
 
 	public static DataFrame readData(Path filePath, SQLContext sql) {
 		StructType kdd99Schema = new StructType(
@@ -118,6 +132,72 @@ public class Kdd99Util {
 		} catch (IOException io) {
 			System.out.println("Could not wite confusion matrix out to file!");
 			io.printStackTrace();
+		}
+	}
+	
+	public static void writePipeline(Pipeline pipe, Path outputDir) {
+		try {
+			Files.createDirectories(outputDir);
+		} catch (IOException io) {
+			System.out.println("Could not create output directory!");
+			io.printStackTrace();
+		}
+		
+		try {
+			pipe.write().overwrite().save(Paths.get(outputDir.toString(), "pipeline").toString());
+		} catch (IOException e) {
+			System.out.println("Could not write out pipeline spec!");
+			e.printStackTrace();
+		}
+	}
+	
+	public static void writePipelineModel(PipelineModel model, Path outputDir) {
+		try {
+			Files.createDirectories(outputDir);
+		} catch (IOException io) {
+			System.out.println("Could not create output directory!");
+			io.printStackTrace();
+		}
+		
+		try {
+			model.write().overwrite().save(Paths.get(outputDir.toString(), "pipelineModel").toString());
+		} catch (IOException e) {
+			System.out.println("Could not write out pipeline spec!");
+			e.printStackTrace();
+		}
+	}
+	
+	public static void writePairs(List<Pair<String, String>> pairs, Path outputDir) {
+		try {
+			Files.createDirectories(outputDir);
+		} catch (IOException io) {
+			System.out.println("Could not create output directory!");
+			io.printStackTrace();
+		}
+		
+		try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(outputDir.toString(), "pairs.csv"))) {
+			for (Pair<String, String> p : pairs)
+				writer.write(p.getValue0() + "," + p.getValue1() + "\n");
+		} catch (IOException e) {
+			System.out.println("Could not write out pairs!");
+			e.printStackTrace();
+		}
+	}
+	
+	public static void writeTriplets(List<Triplet<String, String, String>> trips, Path outputDir) {
+		try {
+			Files.createDirectories(outputDir);
+		} catch (IOException io) {
+			System.out.println("Could not create output directory!");
+			io.printStackTrace();
+		}
+		
+		try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(outputDir.toString(), "triplets.csv"))) {
+			for (Triplet<String, String, String> t : trips)
+				writer.write(t.getValue0() + "," + t.getValue1() + "," + t.getValue2() + "\n");
+		} catch (IOException e) {
+			System.out.println("Could not write out triplets!");
+			e.printStackTrace();
 		}
 	}
 	

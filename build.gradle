@@ -22,6 +22,7 @@ configurations {
 // Dependencies
 dependencies {
 	compile 'com.google.guava:guava:19.0'
+	compile 'org.javatuples:javatuples:1.2'
 	// Spark
 	compile 'com.databricks:spark-csv_2.10:1.4.0'
 	compile('org.apache.spark:spark-core_2.10:1.6.1')
@@ -29,6 +30,7 @@ dependencies {
 
 	// Package in the fat jar so they're usable at runtime (in Spark)!
 	fat 'com.google.guava:guava:19.0'
+	fat 'org.javatuples:javatuples:1.2'
 	fat 'com.databricks:spark-csv_2.10:1.4.0'
 }
 
