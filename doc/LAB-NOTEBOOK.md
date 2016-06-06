@@ -63,3 +63,5 @@ Performance on KDD99 test set ([metrics](../output/rf-bin200-test/metrics.csv), 
 - F1: 93.4669
 
 Comments: Overall performance dropped ever-so-slightly but this is probably more due to random fluctuations than meaningful performance changes. The real meat of this experiment was to generate triplets of `(actual class, binarized class, predicted binarized class)` to see which actual classes are making up all of the false positives from the prior experiment... except it didn't work properly and only the binarized output is showing up.
+
+I re-read some of my ideas from earlier and realized that implementing ensembled or hierarchical classifiers is going to be *very* painful in the Spark ML/LIB framework, especially since there doesn't seem to be an obvious or easy way to de/serialize random forest models. I supose I'll direct my attention towards feature engineering then.
