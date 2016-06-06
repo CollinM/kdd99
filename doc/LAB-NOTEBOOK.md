@@ -11,14 +11,16 @@
   
 **Baseline - Single classifier**
 
-Running a random forest over all of the features.
+Pre-processed all data to remove annoying and meaningless period from end of every line.
+
+Running a random forest over all of the features:
 - 50 trees
 - 20 max depth
 - 80/20 train/test split
 
 Command to run random forest pipeline: `spark-submit --class collinm.kdd99.RandomForestRunner --driver-memory 2g --master local[7] build\libs\kdd-1999-0-fat.jar data\kdd-unique.csv output/rf-base 50 20`
 
-Performance ([metrics](../output/rf-bfase/metrics.csv), [matrix](../output/rf-bfase/matrix.csv):
+Performance on 20% test set ([metrics](../output/rf-bfase/metrics.csv), [matrix](../output/rf-bfase/matrix.csv):
 - Precision: 99.9510
 - Recall: 99.9570
 - F1: 99.9540

@@ -10,6 +10,7 @@ import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.PipelineStage;
 import org.apache.spark.ml.classification.RandomForestClassifier;
 import org.apache.spark.ml.feature.IndexToString;
+import org.apache.spark.ml.feature.OneHotEncoder;
 import org.apache.spark.ml.feature.StringIndexer;
 import org.apache.spark.ml.feature.StringIndexerModel;
 import org.apache.spark.ml.feature.VectorAssembler;
@@ -19,7 +20,7 @@ import org.apache.spark.sql.SQLContext;
 
 import collinm.util.ConfusionMatrix;
 
-public class RandomForestRunner {
+public class RFTrainSave {
 
 	public final static String[] CLASSES = new String[] { "back", "buffer_overflow", "ftp_write", "guess_passwd",
 			"imap", "ipsweep", "land", "loadmodule", "multihop", "neptune", "nmap", "perl", "phf", "pod", "portsweep",
@@ -43,10 +44,7 @@ public class RandomForestRunner {
 
 		// Read data
 		System.out.println("Reading in data");
-		DataFrame wholeDf = Kdd99Util.readData(inputFile, sql);
-		DataFrame[] trainTest = wholeDf.randomSplit(new double[] {0.8, 0.2}, 42L);
-		trainTest[0].cache();
-		trainTest[1].cache();
+		DataFrame train = Kdd99Util.readData(inputFile, sql);
 		
 		// Create pipeline
 		Pipeline pipe1 = Kdd99Util.makeOneHotEncodedPipeline("protocol_type");
@@ -59,7 +57,7 @@ public class RandomForestRunner {
 		StringIndexer targetIndexer = new StringIndexer()
 				.setInputCol("attack_type")
 				.setOutputCol("attack_type_index");
-		StringIndexerModel targetIndexerModel = targetIndexer.fit(trainTest[0]);
+		StringIndexerModel targetIndexerModel = targetIndexer.fit(train);
 		IndexToString targetUnIndexer = new IndexToString()
 				.setInputCol("predicted_attack_type_index")
 				.setOutputCol("predicted_attack_type_label")
@@ -85,21 +83,13 @@ public class RandomForestRunner {
 				.setStages(new PipelineStage[] {pipe1, pipe2, pipe3, pipe4, pipe5, pipe6, pipe7, targetIndexer, featureAssembler, rfc, targetUnIndexer});
 		
 		// Train model
-		PipelineModel model = pipeline.fit(trainTest[0]);
+		PipelineModel model = pipeline.fit(train);
+		train.unpersist();
 		
-		// Evaluate model
-		DataFrame predxns = model.transform(trainTest[1]);
-		ConfusionMatrix metrics = new ConfusionMatrix(CLASSES);
-		for (Row r : predxns.select("attack_type", "predicted_attack_type_label").collect())
-			metrics.increment(r.getString(0), r.getString(1));
-		
-		// Write metrics
-		Kdd99Util.writeMetrics(outputDir, metrics);
-		Kdd99Util.writeConfusionMatrix(outputDir, metrics, "matrix.csv");
+		// Write out model
 		
 		// Finish
 		jsc.close();
 		System.out.println("FINISHED!");
 	}
-
 }

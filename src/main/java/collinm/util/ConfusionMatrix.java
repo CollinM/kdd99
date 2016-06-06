@@ -5,21 +5,20 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import org.javatuples.Triplet;
 
 import com.google.common.base.Joiner;
 
 public class ConfusionMatrix {
 
 	private int numClasses;
+	private String[] classes;
 	private Map<String, Double> classNameMap;
 	private ArrayList<ArrayList<Double>> matrix;
 
 	public ConfusionMatrix(String[] classNames) {
 		this.numClasses = classNames.length;
+		this.classes = classNames;
 		this.classNameMap = new HashMap<>();
 		double counter = 0;
 		for (String name : classNames) {
@@ -37,16 +36,6 @@ public class ConfusionMatrix {
 	public void increment(double actual, double predicted) {
 		List<Double> x = this.matrix.get((int) actual);
 		x.set((int) predicted, x.get((int) predicted) + 1);
-	}
-
-	/**
-	 * 
-	 * @param triplets
-	 *            list of triplets where 0 = ID, 1 = actual, 2 = prediction
-	 */
-	public void measure(List<Triplet<String, Double, Double>> triplets) {
-		for (Triplet<String, Double, Double> t : triplets)
-			this.increment(t.getValue1(), t.getValue2());
 	}
 	
 	/**
@@ -148,10 +137,7 @@ public class ConfusionMatrix {
 
 		// Writer header
 		out.append(",");
-		out.append(commaJoiner
-				.join(IntStream.range(0, this.numClasses)
-						.mapToObj(Integer::toString)
-						.collect(Collectors.toList())));
+		out.append(commaJoiner.join(this.classes));
 		out.append("\n");
 
 		// Write each row class + data

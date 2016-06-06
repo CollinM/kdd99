@@ -7,6 +7,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
+import org.apache.spark.ml.Pipeline;
+import org.apache.spark.ml.PipelineStage;
+import org.apache.spark.ml.feature.OneHotEncoder;
+import org.apache.spark.ml.feature.StringIndexer;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.SQLContext;
 import org.apache.spark.sql.types.DataTypes;
@@ -115,5 +119,24 @@ public class Kdd99Util {
 			System.out.println("Could not wite confusion matrix out to file!");
 			io.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Make a mini-pipeline for converting a categorical variable in
+	 * <code>colName</code> to a one-hot vector in <code>colName + "_vec"</code>
+	 * .
+	 * 
+	 * @param colName
+	 *            target column name
+	 * @return Pipeline to perform the conversion
+	 */
+	public static Pipeline makeOneHotEncodedPipeline(String colName) {
+		StringIndexer vi = new StringIndexer()
+				.setInputCol(colName)
+				.setOutputCol(colName + "_index");
+		OneHotEncoder ohe = new OneHotEncoder()
+				.setInputCol(colName + "_index")
+				.setOutputCol(colName + "_vec");
+		return new Pipeline().setStages(new PipelineStage[] {vi, ohe});
 	}
 }

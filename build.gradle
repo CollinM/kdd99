@@ -21,11 +21,7 @@ configurations {
 
 // Dependencies
 dependencies {
-	// Utilities
-	compile 'com.esotericsoftware:kryo:3.0.3'
 	compile 'com.google.guava:guava:19.0'
-	compile 'org.javatuples:javatuples:1.2'
-	compile 'org.slf4j:slf4j-api:1.7.21'
 	// Spark
 	compile 'com.databricks:spark-csv_2.10:1.4.0'
 	compile('org.apache.spark:spark-core_2.10:1.6.1')
@@ -33,7 +29,6 @@ dependencies {
 
 	// Package in the fat jar so they're usable at runtime (in Spark)!
 	fat 'com.google.guava:guava:19.0'
-	fat 'org.javatuples:javatuples:1.2'
 	fat 'com.databricks:spark-csv_2.10:1.4.0'
 }
 
